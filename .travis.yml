@@ -1,0 +1,61 @@
+sudo: required
+dist: trusty
+language: ruby
+
+before_install:
+before_install:
+- gem install asciidoctor -v 1.5.2
+- gem install tilt
+- sudo pip install git+https://github.com/gitenberg-dev/gitberg
+- sudo pip install pillow
+- sudo pip install cssutils
+- sudo pip install docutils
+- sudo pip install roman
+- sudo pip install git+https://github.com/gitenberg-dev/pg-epubmaker
+script:
+- VERSION=`ruby -e "require 'yaml'; meta = YAML.load_file('metadata.yaml'); puts meta['_version'];"`
+- git clone https://github.com/gitenberg-dev/asciidoctor-htmlbook.git
+- sudo pip install -r asciidoctor-htmlbook/gitberg-machine/requirements.txt
+
+- /usr/bin/python -c "from gitenberg import travis; travis.build_epub()"
+- ebook-convert book.epub book.mobi
+- xvfb-run ebook-convert book.epub book.pdf
+branches:
+  only:
+  - master
+notifications:
+  webhooks:
+    urls:
+      - https://unglue.it/api/travisci/webhook
+    on_success: always
+    on_failure: never
+    on_start: never
+deploy:
+  skip_cleanup: true
+  provider: releases
+  api_key:
+    secure: hg9HNnt8w5/KOE3jhNxeNa5lRzJguHfqAAcIRd7n2Jj7D9C3xDG0I+rMf4oyGM7x0UUG4IO4GGgrxitQrHDfcMhPMhhhCWbZS5xCMkdqxSTWuOTvF38/zw8MIpyGYDFSTrqMfPjYCIllJZan9KjqDmccKJG5hMu/zlSOJ1X3b/SLc6T4LVxK8q5b6wRo1xRUSRcICpPnIsOKe3f+6+RlLc60ygq/YARNeTR8K1/BoNVb5LiaePEcDEuKmKDYvdgRgV/FdVY8fWVnbQuCxjyGXu26cOw40zAk/Yfw3DfiO5aTUyWZ56Wacz+DGJg63ePp3JfUB8lRwpzIGZ459IMeR7ouRvr9PYFtvqioQb7Yrzyo2wz0IN+YGrGlgQ02rAjdSB2mtuXhB2SJZy5yFRs41BGveJWcG8sqPIJcUNLalnzdKSpYGE68zG28eppENlakI79qlDgzSKrR0zixmIpiPq6zaglSSIyJMSjbtzBT7HZ0WPQrHcFX3VOKwKIveJF5oCH/3s3yEjtPOh7MMb8rezj0GTCWEj3DbbN+JZJzDoZDa51AKjOOmnkT8L8pIm+1j+BJQH2kL5vhe2TQAV6ERVtpemXKgoClE8Z7miPgQO6UwuhtTFHTcp5W/5dLCjEC1SZWgd7DsKbLpYoCPdXXqTFoT6eCS9V/AZq2Huy9EyE=
+  file:
+    - book.epub
+    - book.mobi
+    - book.pdf
+  "on":
+    repo: GITenberg/After-the-Rain---how-the-West-lost-the-East_4685
+addons:
+  apt:
+    packages:
+    - xsltproc
+    - xvfb
+    - calibre
+    - python-pip
+    - git
+    - python-dev
+    - libjpeg-dev
+    - libpng-dev
+    - libfreetype6
+    - libfreetype6-dev
+    - zlib1g-dev
+    - python-lxml
+    - libxml2-dev
+    - libxslt1-dev
+    - tidy
